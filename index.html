@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SASS Dashboard</title>
+  <style>
+    :root {
+      --bg: #f6f0e6;
+      --panel: rgba(255, 251, 245, 0.9);
+      --panel-strong: #fffdf9;
+      --ink: #3b1cd9;
+      --muted: #5a6668;
+      --line: rgba(31, 42, 44, 0.12);
+      --accent: #0d6c68;
+      --accent-2: #d28842;
+      --accent-3: #b6443b;
+      --accent-4: #637937;
+      --shadow: 0 24px 55px rgba(31, 42, 44, 0.08);
+      --radius: 22px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Aptos", "Segoe UI Variable", "Trebuchet MS", sans-serif;
+      color: #ff0000;
+      background:
+        radial-gradient(circle at top left, rgba(210, 136, 66, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(13, 108, 104, 0.12), transparent 24%),
+        linear-gradient(180deg, #f9f4eb 0%, var(--bg) 42%, #efe5d7 100%);
+    }
+
+    .shell {
+      width: min(1200px, calc(100% - 32px));
+      margin: 24px auto 48px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      font-family: Lucida Calligraphy, Georgia, serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .subtle {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 14px 0 0;
+      max-width: 60ch;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.9fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 22px;
+    }
+
+    .dashboard-panel {
+      min-width: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 52ch;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field.wide {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid rgba(31, 42, 44, 0.15);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--ink);
+      padding: 12px 14px;
+      border-radius: 14px;
+      outline: none;
+      transition: border-color 160ms ease, transform 160ms ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 14px 25px rgba(13, 108, 104, 0.22);
+    }
+
+    .secondary {
+      background: rgba(13, 108, 104, 0.12);
+      color: var(--accent);
+    }
+
+    .ghost {
+      background: rgba(31, 42, 44, 0.07);
+      color: var(--ink);
+    }
+
+    .danger {
+      background: rgba(182, 68, 59, 0.12);
+      color: var(--accent-3);
+    }
+
+    .status {
+      min-height: 1.5rem;
+      font-size: 0.92rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 0.95rem;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f7f3ed;
+      z-index: 1;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row-actions button {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+
+    .dashboard-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .filter-box {
+      min-width: 210px;
+    }
+
+    .chart-frame.detail-chart {
+      min-height: 360px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi {
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+      animation: rise 500ms ease both;
+    }
+
+    .kpi::after {
+      content: "";
+      position: absolute;
+      inset: auto auto -16px -16px;
+      width: 88px;
+      height: 88px;
+      border-radius: 999px;
+      opacity: 0.12;
+      background: currentColor;
+    }
+
+    .kpi:nth-child(1) { color: var(--accent); }
+    .kpi:nth-child(2) { color: var(--accent-2); }
+    .kpi:nth-child(3) { color: var(--accent-3); }
+    .kpi:nth-child(4) { color: var(--accent-4); }
+
+    .kpi small {
+      display: block;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: clamp(1.35rem, 2vw, 2rem);
+      font-family: Cambria, Georgia, serif;
+      color: var(--ink);
+      position: relative;
+      z-index: 1;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .chart-card {
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+      padding: 18px;
+    }
+
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .chart-card h3 {
+      font-size: 1.1rem;
+    }
+
+    .chart-type-select {
+      min-width: 160px;
+      max-width: 220px;
+    }
+
+    .chart-frame {
+      width: 100%;
+      min-height: 280px;
+    }
+
+    .chart-frame svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 99px;
+      display: inline-block;
+    }
+
+    .detail-wrap {
+      display: grid;
+      grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: center;
+    }
+
+    .detail-summary {
+      display: grid;
+      gap: 16px;
+    }
+
+    .detail-month {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .detail-metric {
+      display: grid;
+      gap: 6px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .detail-metric small {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .detail-metric strong {
+      font-size: 1.25rem;
+      font-family: Cambria, Georgia, serif;
+    }
+
+    .detail-progress {
+      height: 12px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(31, 42, 44, 0.08);
+      overflow: hidden;
+    }
+
+    .detail-progress span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .detail-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .empty-state {
+      padding: 36px 18px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.52);
+    }
+
+    .chart-card.wide {
+      grid-column: 1 / -1;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .charts {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-card.wide {
+        grid-column: auto;
+      }
+
+      .detail-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 20px, 1200px);
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .form-grid,
+      .kpis,
+      .detail-meta {
+        grid-template-columns: 1fr;
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <main class="workspace">
+      <section class="panel dashboard-panel">
+        <div class="panel-header">
+          <h2>SASS YTD PERFORMANCE</h2>
+        </div>
+
+        <div class="dashboard-controls">
+          <div class="field filter-box">
+            <label for="month-filter">Month Filter</label>
+            <select id="month-filter"></select>
+          </div>
+          <div class="field filter-box">
+            <label for="detail-month-filter">Detail Month</label>
+            <select id="detail-month-filter"></select>
+          </div>
+        </div>
+
+        <section class="kpis" id="kpi-grid"></section>
+
+        <section class="charts">
+          <article class="chart-card">
+            <div class="chart-card-header">
+              <h3>Monthly Mix</h3>
+              <select id="trend-chart-type" class="chart-type-select">
+                <option value="combo">Combo</option>
+                <option value="line">Line</option>
+                <option value="grouped">Grouped Bar</option>
+                <option value="stacked">Stacked Bar</option>
+                <option value="area">Area</option>
+              </select>
+            </div>
+            <div class="chart-frame" id="trend-chart"></div>
+            <div class="legend">
+              <span><i style="background:#0d6c68"></i>Sent</span>
+              <span><i style="background:#d28842"></i>Sold</span>
+              <span><i style="background:#b6443b"></i>Return</span>
+            </div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-card-header">
+              <h3>Rate Comparison</h3>
+              <select id="comparison-chart-type" class="chart-type-select">
+                <option value="dumbbell">Dumbbell</option>
+                <option value="line">Line</option>
+                <option value="bar">Bar</option>
+                <option value="column">Column</option>
+                <option value="area">Area</option>
+              </select>
+            </div>
+            <div class="chart-frame" id="comparison-chart"></div>
+            <div class="legend">
+              <span><i style="background:#637937"></i>Conversion rate</span>
+              <span><i style="background:#b6443b"></i>Return rate</span>
+            </div>
+          </article>
+
+          <article class="chart-card wide">
+            <div class="chart-card-header">
+              <h3>Selected Month Breakdown</h3>
+              <select id="detail-chart-type" class="chart-type-select">
+                <option value="donut">Donut</option>
+                <option value="pie">Pie</option>
+                <option value="bars">Bars</option>
+                <option value="funnel">Funnel</option>
+                <option value="gauge">Gauge</option>
+              </select>
+            </div>
+            <div class="chart-frame detail-chart" id="return-chart"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Data Manager</h2>
+        </div>
+
+        <form id="entry-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="month-input">Month</label>
+              <input id="month-input" name="month" type="month" required>
+            </div>
+            <div class="field">
+              <label for="sent-input">Sent / Delivered (SAR)</label>
+              <input id="sent-input" name="sent" type="number" min="0" step="0.1" placeholder="6424.1" required>
+            </div>
+            <div class="field">
+              <label for="sold-input">Sold / Sales (SAR)</label>
+              <input id="sold-input" name="sold" type="number" min="0" step="0.1" placeholder="5091.6" required>
+            </div>
+            <div class="field">
+              <label for="return-input">Return / Received (SAR)</label>
+              <input id="return-input" name="return" type="number" min="0" step="0.1" placeholder="1332.5" required>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" type="submit">Save Month</button>
+            <button class="secondary" type="button" id="clear-form">Clear Form</button>
+            <button class="ghost" type="button" id="export-excel">Export to Excel</button>
+            <button class="ghost" type="button" id="import-data">Import File</button>
+            <button class="danger" type="button" id="reset-data">Reset to Default</button>
+          </div>
+        </form>
+
+        <input id="import-file-input" type="file" accept=".xlsx,.csv" hidden>
+
+        <div class="status" id="status-text" aria-live="polite"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Sent</th>
+                <th>Sold</th>
+                <th>Return</th>
+                <th>Conversion Rate</th>
+                <th>Return Rate</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./assets/jszip.min.js"></script>
+  <script>
+    const STORAGE_KEY = "sass-dashboard-data-v1";
+    const CHART_PREFS_KEY = "sass-dashboard-chart-prefs-v1";
+    const defaultData = [
+      { month: "2026-02", sent: 6424.1, sold: 5091.6, return: 1332.5 }
+    ];
+    const defaultChartPrefs = {
+      trend: "combo",
+      comparison: "dumbbell",
+      detail: "donut"
+    };
+
+    const form = document.getElementById("entry-form");
+    const monthInput = document.getElementById("month-input");
+    const sentInput = document.getElementById("sent-input");
+    const soldInput = document.getElementById("sold-input");
+    const returnInput = document.getElementById("return-input");
+    const tableBody = document.getElementById("table-body");
+    const statusText = document.getElementById("status-text");
+    const monthFilter = document.getElementById("month-filter");
+    const detailMonthFilter = document.getElementById("detail-month-filter");
+    const trendChartType = document.getElementById("trend-chart-type");
+    const comparisonChartType = document.getElementById("comparison-chart-type");
+    const detailChartType = document.getElementById("detail-chart-type");
+    const kpiGrid = document.getElementById("kpi-grid");
+    const importFileInput = document.getElementById("import-file-input");
+
+    let editingMonth = null;
+    let rows = loadRows();
+    let chartPrefs = loadChartPrefs();
+
+    function loadRows() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return [...defaultData];
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          return [...defaultData];
+        }
+
+        return sanitizeRows(parsed);
+      } catch (error) {
+        console.error(error);
+        return [...defaultData];
+      }
+    }
+
+    function sanitizeRows(data) {
+      const map = new Map();
+      data.forEach((item) => {
+        if (!item || typeof item.month !== "string") {
+          return;
+        }
+
+        const month = item.month;
+        const sent = toNumber(item.sent);
+        const sold = toNumber(item.sold);
+        const returned = toNumber(item.return);
+
+        if (!month || sent < 0 || sold < 0 || returned < 0) {
+          return;
+        }
+
+        map.set(month, { month, sent, sold, return: returned });
+      });
+
+      return [...map.values()].sort((a, b) => a.month.localeCompare(b.month));
+    }
+
+    function toNumber(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function saveRows() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+    }
+
+    function loadChartPrefs() {
+      try {
+        const raw = localStorage.getItem(CHART_PREFS_KEY);
+        if (!raw) {
+          return { ...defaultChartPrefs };
+        }
+
+        const parsed = JSON.parse(raw);
+        return {
+          trend: parsed?.trend || defaultChartPrefs.trend,
+          comparison: parsed?.comparison || defaultChartPrefs.comparison,
+          detail: parsed?.detail || defaultChartPrefs.detail
+        };
+      } catch (error) {
+        console.error(error);
+        return { ...defaultChartPrefs };
+      }
+    }
+
+    function saveChartPrefs() {
+      localStorage.setItem(CHART_PREFS_KEY, JSON.stringify(chartPrefs));
+    }
+
+    function setStatus(message, isError = false) {
+      statusText.textContent = message;
+      statusText.style.color = isError ? "var(--accent-3)" : "var(--accent)";
+    }
+
+    function formatMonth(month) {
+      const [year, monthPart] = month.split("-");
+      if (!year || !monthPart) {
+        return month;
+      }
+
+      const date = new Date(`${month}-01T00:00:00`);
+      return new Intl.DateTimeFormat("en", { month: "short", year: "2-digit" }).format(date);
+    }
+
+    function formatValue(value) {
+      return new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      }).format(value);
+    }
+
+    function formatPercent(value) {
+      return `${(value * 100).toFixed(1)}%`;
+    }
+
+    function getEnrichedRows(source) {
+      return source.map((row) => {
+        const conversionRate = row.sent > 0 ? row.sold / row.sent : 0;
+        const returnRate = row.sold > 0 ? row.return / row.sold : 0;
+        return { ...row, conversionRate, returnRate };
+      });
+    }
+
+    function getFilteredRows() {
+      const selected = monthFilter.value;
+      const base = rows;
+      const filtered = selected === "all"
+        ? base
+        : base.filter((row) => row.month === selected);
+      return getEnrichedRows(filtered);
+    }
+
+    function resetForm() {
+      form.reset();
+      editingMonth = null;
+      monthInput.disabled = false;
+    }
+
+    function editRow(month) {
+      const row = rows.find((item) => item.month === month);
+      if (!row) {
+        return;
+      }
+
+      editingMonth = month;
+      monthInput.value = row.month;
+      sentInput.value = row.sent;
+      soldInput.value = row.sold;
+      returnInput.value = row.return;
+      monthInput.disabled = true;
+      setStatus(`Editing ${formatMonth(month)}. Save Month to update it.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteRow(month) {
+      rows = rows.filter((row) => row.month !== month);
+      saveRows();
+      if (editingMonth === month) {
+        resetForm();
+      }
+      renderAll();
+      setStatus(`${formatMonth(month)} removed.`);
+    }
+
+    function parseCsvLine(line) {
+      const values = [];
+      let current = "";
+      let insideQuotes = false;
+
+      for (let index = 0; index < line.length; index += 1) {
+        const char = line[index];
+        const next = line[index + 1];
+
+        if (char === '"') {
+          if (insideQuotes && next === '"') {
+            current += '"';
+            index += 1;
+          } else {
+            insideQuotes = !insideQuotes;
+          }
+        } else if (char === "," && !insideQuotes) {
+          values.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+
+      values.push(current.trim());
+      return values;
+    }
+
+    function parseCsv(text) {
+      return text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map(parseCsvLine);
+    }
+
+    function normalizeHeader(value) {
+      return value.toLowerCase().replace(/\s+/g, "");
+    }
+
+    function escapeXml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    function getColumnName(columnNumber) {
+      let dividend = columnNumber;
+      let columnName = "";
+      while (dividend > 0) {
+        const modulo = (dividend - 1) % 26;
+        columnName = String.fromCharCode(65 + modulo) + columnName;
+        dividend = Math.floor((dividend - modulo) / 26);
+      }
+      return columnName;
+    }
+
+    function getCellReference(rowNumber, columnNumber) {
+      return `${getColumnName(columnNumber)}${rowNumber}`;
+    }
+
+    function buildInlineStringCell(ref, value, styleId = null) {
+      const style = styleId === null ? "" : ` s="${styleId}"`;
+      return `<c r="${ref}" t="inlineStr"${style}><is><t>${escapeXml(value)}</t></is></c>`;
+    }
+
+    function buildNumberCell(ref, value, styleId = null) {
+      const style = styleId === null ? "" : ` s="${styleId}"`;
+      return `<c r="${ref}"${style}><v>${Number(value)}</v></c>`;
+    }
+
+    function buildWorksheetXml() {
+      const header = ["Month", "Sent", "Sold", "Return"];
+      const sheetRows = [
+        header,
+        ...rows.map((row) => [row.month, row.sent, row.sold, row.return])
+      ];
+      const lastRow = Math.max(sheetRows.length, 1);
+
+      const xmlRows = sheetRows.map((values, rowIndex) => {
+        const rowNumber = rowIndex + 1;
+        const cells = values.map((value, columnIndex) => {
+          const ref = getCellReference(rowNumber, columnIndex + 1);
+          if (rowIndex === 0 || columnIndex === 0) {
+            return buildInlineStringCell(ref, value, rowIndex === 0 ? 1 : null);
+          }
+          return buildNumberCell(ref, value, 2);
+        }).join("");
+
+        return `<row r="${rowNumber}">${cells}</row>`;
+      }).join("");
+
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <dimension ref="A1:D${lastRow}" />
+  <sheetViews>
+    <sheetView workbookViewId="0">
+      <pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen" />
+      <selection pane="bottomLeft" activeCell="A2" sqref="A2" />
+    </sheetView>
+  </sheetViews>
+  <sheetFormatPr defaultRowHeight="18" />
+  <cols>
+    <col min="1" max="1" width="14" customWidth="1" />
+    <col min="2" max="4" width="16" customWidth="1" />
+  </cols>
+  <sheetData>${xmlRows}</sheetData>
+  <autoFilter ref="A1:D${lastRow}" />
+</worksheet>`;
+    }
+
+    function buildWorkbookXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <bookViews>
+    <workbookView xWindow="240" yWindow="15" windowWidth="16095" windowHeight="9660" />
+  </bookViews>
+  <sheets>
+    <sheet name="Data" sheetId="1" r:id="rId1" />
+  </sheets>
+</workbook>`;
+    }
+
+    function buildWorkbookRelsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml" />
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml" />
+</Relationships>`;
+    }
+
+    function buildRootRelsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml" />
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml" />
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml" />
+</Relationships>`;
+    }
+
+    function buildContentTypesXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />
+  <Default Extension="xml" ContentType="application/xml" />
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" />
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" />
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" />
+  <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml" />
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml" />
+</Types>`;
+    }
+
+    function buildStylesXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2">
+    <font>
+      <sz val="11" />
+      <name val="Aptos" />
+      <family val="2" />
+    </font>
+    <font>
+      <b />
+      <sz val="11" />
+      <name val="Aptos" />
+      <family val="2" />
+      <color rgb="FFFFFFFF" />
+    </font>
+  </fonts>
+  <fills count="3">
+    <fill><patternFill patternType="none" /></fill>
+    <fill><patternFill patternType="gray125" /></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF0D6C68" /><bgColor indexed="64" /></patternFill></fill>
+  </fills>
+  <borders count="1">
+    <border>
+      <left />
+      <right />
+      <top />
+      <bottom />
+      <diagonal />
+    </border>
+  </borders>
+  <cellStyleXfs count="1">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" />
+  </cellStyleXfs>
+  <cellXfs count="3">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" />
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" />
+    <xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" />
+  </cellXfs>
+  <cellStyles count="1">
+    <cellStyle name="Normal" xfId="0" builtinId="0" />
+  </cellStyles>
+</styleSheet>`;
+    }
+
+    function buildAppXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <Application>Microsoft Excel</Application>
+  <DocSecurity>0</DocSecurity>
+  <ScaleCrop>false</ScaleCrop>
+  <HeadingPairs>
+    <vt:vector size="2" baseType="variant">
+      <vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant>
+      <vt:variant><vt:i4>1</vt:i4></vt:variant>
+    </vt:vector>
+  </HeadingPairs>
+  <TitlesOfParts>
+    <vt:vector size="1" baseType="lpstr">
+      <vt:lpstr>Data</vt:lpstr>
+    </vt:vector>
+  </TitlesOfParts>
+  <Company></Company>
+  <LinksUpToDate>false</LinksUpToDate>
+  <SharedDoc>false</SharedDoc>
+  <HyperlinksChanged>false</HyperlinksChanged>
+  <AppVersion>16.0300</AppVersion>
+</Properties>`;
+    }
+
+    function buildCoreXml() {
+      const createdAt = new Date().toISOString();
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <dc:creator>Codex</dc:creator>
+  <cp:lastModifiedBy>Codex</cp:lastModifiedBy>
+  <dcterms:created xsi:type="dcterms:W3CDTF">${createdAt}</dcterms:created>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">${createdAt}</dcterms:modified>
+</cp:coreProperties>`;
+    }
+
+    async function createWorkbookBlob() {
+      if (typeof JSZip === "undefined") {
+        throw new Error("Excel support is not loaded. Refresh the page and try again.");
+      }
+
+      const zip = new JSZip();
+      zip.file("[Content_Types].xml", buildContentTypesXml());
+      zip.folder("_rels").file(".rels", buildRootRelsXml());
+      zip.folder("docProps").file("app.xml", buildAppXml());
+      zip.folder("docProps").file("core.xml", buildCoreXml());
+      zip.folder("xl").file("workbook.xml", buildWorkbookXml());
+      zip.folder("xl").folder("_rels").file("workbook.xml.rels", buildWorkbookRelsXml());
+      zip.folder("xl").file("styles.xml", buildStylesXml());
+      zip.folder("xl").folder("worksheets").file("sheet1.xml", buildWorksheetXml());
+
+      return zip.generateAsync({
+        type: "blob",
+        mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+    }
+
+    async function exportExcel() {
+      try {
+        const blob = await createWorkbookBlob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "sass-dashboard-data.xlsx";
+        link.click();
+        URL.revokeObjectURL(link.href);
+        setStatus("Excel file exported as .xlsx. Edit it in Excel and import it back here.");
+      } catch (error) {
+        setStatus(error.message || "Unable to export the Excel file.", true);
+      }
+    }
+
+    function getSheetPathFromWorkbook(workbookXml, workbookRelsXml) {
+      const parser = new DOMParser();
+      const workbookDoc = parser.parseFromString(workbookXml, "application/xml");
+      const relsDoc = parser.parseFromString(workbookRelsXml, "application/xml");
+      const sheets = [...workbookDoc.getElementsByTagNameNS("http://schemas.openxmlformats.org/spreadsheetml/2006/main", "sheet")];
+      const targetSheet = sheets.find((sheet) => sheet.getAttribute("name") === "Data") || sheets[0];
+
+      if (!targetSheet) {
+        throw new Error("No worksheet was found in the Excel file.");
+      }
+
+      const relationId = targetSheet.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id");
+      const relationships = [...relsDoc.getElementsByTagNameNS("http://schemas.openxmlformats.org/package/2006/relationships", "Relationship")];
+      const relation = relationships.find((item) => item.getAttribute("Id") === relationId);
+
+      if (!relation) {
+        throw new Error("The worksheet relationship could not be resolved.");
+      }
+
+      const target = relation.getAttribute("Target") || "";
+      return target.startsWith("xl/") ? target : `xl/${target.replace(/^\/+/, "")}`;
+    }
+
+    function getSharedStrings(sharedStringsXml) {
+      if (!sharedStringsXml) {
+        return [];
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(sharedStringsXml, "application/xml");
+      const items = [...doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/spreadsheetml/2006/main", "si")];
+      return items.map((item) => [...item.getElementsByTagNameNS("http://schemas.openxmlformats.org/spreadsheetml/2006/main", "t")]
+        .map((node) => node.textContent || "")
+        .join(""));
+    }
+
+    function getColumnIndexFromRef(ref) {
+      const letters = (ref.match(/[A-Z]+/i) || [""])[0].toUpperCase();
+      let index = 0;
+      for (const letter of letters) {
+        index = (index * 26) + (letter.charCodeAt(0) - 64);
+      }
+      return index - 1;
+    }
+
+    function getCellText(cell, sharedStrings) {
+      const mainNs = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+      const type = cell.getAttribute("t");
+      const valueNode = cell.getElementsByTagNameNS(mainNs, "v")[0];
+      const inlineText = [...cell.getElementsByTagNameNS(mainNs, "t")]
+        .map((node) => node.textContent || "")
+        .join("");
+
+      if (type === "inlineStr") {
+        return inlineText;
+      }
+
+      if (type === "s") {
+        const sharedIndex = Number(valueNode?.textContent || 0);
+        return sharedStrings[sharedIndex] || "";
+      }
+
+      if (type === "b") {
+        return valueNode?.textContent === "1" ? "TRUE" : "FALSE";
+      }
+
+      if (inlineText) {
+        return inlineText;
+      }
+
+      return valueNode?.textContent || "";
+    }
+
+    function normalizeImportedMonth(value) {
+      const text = String(value || "").trim();
+      if (/^\d{4}-\d{2}$/.test(text)) {
+        return text;
+      }
+
+      const numericValue = Number(text);
+      if (Number.isFinite(numericValue) && numericValue > 20000 && numericValue < 60000) {
+        const excelEpoch = Date.UTC(1899, 11, 30);
+        const date = new Date(excelEpoch + numericValue * 86400000);
+        return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+      }
+
+      const parsedDate = new Date(text);
+      if (!Number.isNaN(parsedDate.getTime())) {
+        return `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, "0")}`;
+      }
+
+      return "";
+    }
+
+    function buildRowsFromGrid(grid) {
+      if (grid.length < 2) {
+        throw new Error("The file is empty or does not contain data rows.");
+      }
+
+      const headers = grid[0].map(normalizeHeader);
+      const monthIndex = headers.indexOf("month");
+      const sentIndex = headers.indexOf("sent");
+      const soldIndex = headers.indexOf("sold");
+      const returnIndex = headers.indexOf("return");
+
+      if ([monthIndex, sentIndex, soldIndex, returnIndex].some((index) => index === -1)) {
+        throw new Error("The file must contain Month, Sent, Sold, and Return columns.");
+      }
+
+      return grid.slice(1).filter((columns) => columns.some((value) => String(value || "").trim() !== "")).map((columns, rowIndex) => {
+        const month = normalizeImportedMonth(columns[monthIndex]);
+        const sent = Number(columns[sentIndex]);
+        const sold = Number(columns[soldIndex]);
+        const returned = Number(columns[returnIndex]);
+
+        if (!/^\d{4}-\d{2}$/.test(month)) {
+          throw new Error(`Row ${rowIndex + 2}: Month must be in YYYY-MM format.`);
+        }
+
+        if ([sent, sold, returned].some((value) => !Number.isFinite(value) || value < 0)) {
+          throw new Error(`Row ${rowIndex + 2}: Sent, Sold, and Return must be valid numbers.`);
+        }
+
+        return { month, sent, sold, return: returned };
+      });
+    }
+
+    async function importCsvText(text) {
+      const parsed = parseCsv(text);
+      return buildRowsFromGrid(parsed);
+    }
+
+    async function importXlsxFile(file) {
+      if (typeof JSZip === "undefined") {
+        throw new Error("Excel support is not loaded. Refresh the page and try again.");
+      }
+
+      const zip = await JSZip.loadAsync(await file.arrayBuffer());
+      const workbookFile = zip.file("xl/workbook.xml");
+      const relsFile = zip.file("xl/_rels/workbook.xml.rels");
+
+      if (!workbookFile || !relsFile) {
+        throw new Error("This Excel file is missing workbook information.");
+      }
+
+      const workbookXml = await workbookFile.async("string");
+      const workbookRelsXml = await relsFile.async("string");
+      const sheetPath = getSheetPathFromWorkbook(workbookXml, workbookRelsXml);
+      const worksheetFile = zip.file(sheetPath);
+
+      if (!worksheetFile) {
+        throw new Error("The data worksheet could not be found in the Excel file.");
+      }
+
+      const sharedStringsFile = zip.file("xl/sharedStrings.xml");
+      const sharedStrings = sharedStringsFile
+        ? getSharedStrings(await sharedStringsFile.async("string"))
+        : [];
+
+      const worksheetXml = await worksheetFile.async("string");
+      const parser = new DOMParser();
+      const worksheetDoc = parser.parseFromString(worksheetXml, "application/xml");
+      const rowNodes = [...worksheetDoc.getElementsByTagNameNS("http://schemas.openxmlformats.org/spreadsheetml/2006/main", "row")];
+      const grid = rowNodes.map((rowNode) => {
+        const rowValues = [];
+        const cellNodes = [...rowNode.getElementsByTagNameNS("http://schemas.openxmlformats.org/spreadsheetml/2006/main", "c")];
+        cellNodes.forEach((cellNode) => {
+          const ref = cellNode.getAttribute("r") || "";
+          const columnIndex = getColumnIndexFromRef(ref);
+          rowValues[columnIndex] = getCellText(cellNode, sharedStrings);
+        });
+        return rowValues;
+      });
+
+      return buildRowsFromGrid(grid);
+    }
+
+    async function importSpreadsheet(file) {
+      const lowerName = file.name.toLowerCase();
+      if (lowerName.endsWith(".xlsx")) {
+        return importXlsxFile(file);
+      }
+
+      if (lowerName.endsWith(".csv")) {
+        return importCsvText(await file.text());
+      }
+
+      throw new Error("Please choose a .xlsx or .csv file.");
+    }
+
+    function resetData() {
+      rows = [...defaultData];
+      saveRows();
+      resetForm();
+      renderAll();
+      setStatus("Dashboard reset to the February reference data.");
+    }
+
+    function renderTable() {
+      const enriched = getEnrichedRows(rows);
+      if (!enriched.length) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">No data yet. Add your first monthly total above.</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tableBody.innerHTML = enriched.map((row) => `
+        <tr>
+          <td>${formatMonth(row.month)}</td>
+          <td>${formatValue(row.sent)}</td>
+          <td>${formatValue(row.sold)}</td>
+          <td>${formatValue(row.return)}</td>
+          <td>${formatPercent(row.conversionRate)}</td>
+          <td>${formatPercent(row.returnRate)}</td>
+          <td>
+            <div class="row-actions">
+              <button class="secondary" type="button" data-edit="${row.month}">Edit</button>
+              <button class="danger" type="button" data-delete="${row.month}">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderFilterOptions() {
+      const current = monthFilter.value || "all";
+      const options = ['<option value="all">All Months</option>']
+        .concat(
+          rows.map((row) => `<option value="${row.month}">${formatMonth(row.month)}</option>`)
+        );
+
+      monthFilter.innerHTML = options.join("");
+      monthFilter.value = rows.some((row) => row.month === current) || current === "all" ? current : "all";
+    }
+
+    function renderDetailFilterOptions(filteredRows) {
+      const source = filteredRows.length ? filteredRows : rows;
+      const current = detailMonthFilter.value;
+      const options = source.map((row) => `<option value="${row.month}">${formatMonth(row.month)}</option>`);
+      detailMonthFilter.innerHTML = options.join("");
+
+      if (!source.length) {
+        detailMonthFilter.value = "";
+        return;
+      }
+
+      detailMonthFilter.value = source.some((row) => row.month === current)
+        ? current
+        : source[source.length - 1].month;
+    }
+
+    function getSelectedDetailRow(filteredRows) {
+      const source = filteredRows.length ? filteredRows : rows;
+      if (!source.length) {
+        return null;
+      }
+
+      return source.find((row) => row.month === detailMonthFilter.value) || source[source.length - 1];
+    }
+
+    function renderKpis(filteredRows) {
+      const totalSent = filteredRows.reduce((sum, row) => sum + row.sent, 0);
+      const totalSold = filteredRows.reduce((sum, row) => sum + row.sold, 0);
+      const totalReturn = filteredRows.reduce((sum, row) => sum + row.return, 0);
+      const conversionRate = totalSent > 0 ? totalSold / totalSent : 0;
+      const returnRate = totalSold > 0 ? totalReturn / totalSold : 0;
+
+      const cards = [
+        { label: "Total Sent", value: formatValue(totalSent) + " SAR" },
+        { label: "Total Sold", value: formatValue(totalSold) + " SAR" },
+        { label: "Total Return", value: formatValue(totalReturn) + " SAR" },
+        { label: "Conversion Rate", value: formatPercent(conversionRate), hint: `Return Rate ${formatPercent(returnRate)}` }
+      ];
+
+      kpiGrid.innerHTML = cards.map((card) => `
+        <article class="kpi">
+          <small>${card.label}</small>
+          <strong>${card.value}</strong>
+          ${card.hint ? `<div class="subtle">${card.hint}</div>` : ""}
+        </article>
+      `).join("");
+    }
+
+    function svgEmpty(message) {
+      return `
+        <div class="empty-state">${message}</div>
+      `;
+    }
+
+    function createSvg(width, height, content) {
+      return `
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Dashboard chart">
+          ${content}
+        </svg>
+      `;
+    }
+
+    function getSeriesConfig(mode) {
+      if (mode === "rate") {
+        return [
+          { key: "conversionRate", color: "#637937", label: "Conversion Rate", formatter: formatPercent },
+          { key: "returnRate", color: "#b6443b", label: "Return Rate", formatter: formatPercent }
+        ];
+      }
+
+      return [
+        { key: "sent", color: "#0d6c68", label: "Sent", formatter: (value) => `${formatValue(value)} SAR` },
+        { key: "sold", color: "#d28842", label: "Sold", formatter: (value) => `${formatValue(value)} SAR` },
+        { key: "return", color: "#b6443b", label: "Return", formatter: (value) => `${formatValue(value)} SAR` }
+      ];
+    }
+
+    function renderMultiSeriesLineChart(rowsSource, containerId, mode = "value") {
+      const container = document.getElementById(containerId);
+      if (!rowsSource.length) {
+        container.innerHTML = svgEmpty("Add data to view this chart.");
+        return;
+      }
+
+      const series = getSeriesConfig(mode);
+      const width = 820;
+      const height = 320;
+      const left = 56;
+      const top = 18;
+      const right = 18;
+      const bottom = 52;
+      const plotWidth = width - left - right;
+      const plotHeight = height - top - bottom;
+      const maxValue = Math.max(...rowsSource.flatMap((row) => series.map((item) => row[item.key])), 1);
+      const scaleY = (value) => top + plotHeight - (value / maxValue) * plotHeight;
+      const scaleX = (index) => rowsSource.length > 1 ? left + (plotWidth / (rowsSource.length - 1)) * index : left + plotWidth / 2;
+
+      const grid = Array.from({ length: 5 }, (_, i) => {
+        const value = (maxValue / 4) * i;
+        const y = top + plotHeight - (plotHeight / 4) * i;
+        const label = mode === "rate" ? formatPercent(value) : formatValue(value);
+        return `
+          <line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="rgba(31,42,44,0.12)" />
+          <text x="${left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#5a6668">${label}</text>
+        `;
+      }).join("");
+
+      const xLabels = rowsSource.map((row, index) => `
+        <text x="${scaleX(index)}" y="${height - 20}" text-anchor="middle" font-size="11" fill="#5a6668">${formatMonth(row.month)}</text>
+      `).join("");
+
+      const seriesMarkup = series.map((item) => {
+        const path = rowsSource.map((row, index) => `${index === 0 ? "M" : "L"} ${scaleX(index)} ${scaleY(row[item.key])}`).join(" ");
+        const dots = rowsSource.map((row, index) => `
+          <circle cx="${scaleX(index)}" cy="${scaleY(row[item.key])}" r="4.5" fill="${item.color}" stroke="#ffffff" stroke-width="2" />
+        `).join("");
+        return `<path d="${path}" fill="none" stroke="${item.color}" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" />${dots}`;
+      }).join("");
+
+      container.innerHTML = createSvg(width, height, `${grid}${xLabels}${seriesMarkup}`);
+    }
+
+    function renderMultiSeriesAreaChart(rowsSource, containerId, mode = "value") {
+      const container = document.getElementById(containerId);
+      if (!rowsSource.length) {
+        container.innerHTML = svgEmpty("Add data to view this chart.");
+        return;
+      }
+
+      const series = getSeriesConfig(mode);
+      const width = 820;
+      const height = 320;
+      const left = 56;
+      const top = 18;
+      const right = 18;
+      const bottom = 52;
+      const plotWidth = width - left - right;
+      const plotHeight = height - top - bottom;
+      const maxValue = Math.max(...rowsSource.flatMap((row) => series.map((item) => row[item.key])), 1);
+      const scaleY = (value) => top + plotHeight - (value / maxValue) * plotHeight;
+      const scaleX = (index) => rowsSource.length > 1 ? left + (plotWidth / (rowsSource.length - 1)) * index : left + plotWidth / 2;
+
+      const grid = Array.from({ length: 5 }, (_, i) => {
+        const value = (maxValue / 4) * i;
+        const y = top + plotHeight - (plotHeight / 4) * i;
+        const label = mode === "rate" ? formatPercent(value) : formatValue(value);
+        return `
+          <line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="rgba(31,42,44,0.12)" />
+          <text x="${left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#5a6668">${label}</text>
+        `;
+      }).join("");
+
+      const xLabels = rowsSource.map((row, index) => `
+        <text x="${scaleX(index)}" y="${height - 20}" text-anchor="middle" font-size="11" fill="#5a6668">${formatMonth(row.month)}</text>
+      `).join("");
+
+      const seriesMarkup = series.map((item) => {
+        const path = rowsSource.map((row, index) => `${index === 0 ? "M" : "L"} ${scaleX(index)} ${scaleY(row[item.key])}`).join(" ");
+        const area = `${path} L ${scaleX(rowsSource.length - 1)} ${top + plotHeight} L ${scaleX(0)} ${top + plotHeight} Z`;
+        return `
+          <path d="${area}" fill="${item.color}" opacity="0.16" />
+          <path d="${path}" fill="none" stroke="${item.color}" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" />
+        `;
+      }).join("");
+
+      container.innerHTML = createSvg(width, height, `${grid}${xLabels}${seriesMarkup}`);
+    }
+
+    function renderGroupedBarChart(rowsSource, containerId, mode = "value") {
+      const container = document.getElementById(containerId);
+      if (!rowsSource.length) {
+        container.innerHTML = svgEmpty("Add data to view this chart.");
+        return;
+      }
+
+      const series = getSeriesConfig(mode);
+      const width = 820;
+      const height = 320;
+      const left = 56;
+      const top = 18;
+      const right = 18;
+      const bottom = 56;
+      const plotWidth = width - left - right;
+      const plotHeight = height - top - bottom;
+      const maxValue = Math.max(...rowsSource.flatMap((row) => series.map((item) => row[item.key])), 1);
+      const groupWidth = plotWidth / rowsSource.length;
+      const barWidth = Math.min(24, groupWidth / (series.length + 1));
+      const scaleY = (value) => top + plotHeight - (value / maxValue) * plotHeight;
+
+      const grid = Array.from({ length: 5 }, (_, i) => {
+        const value = (maxValue / 4) * i;
+        const y = top + plotHeight - (plotHeight / 4) * i;
+        const label = mode === "rate" ? formatPercent(value) : formatValue(value);
+        return `
+          <line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="rgba(31,42,44,0.12)" />
+          <text x="${left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#5a6668">${label}</text>
+        `;
+      }).join("");
+
+      const bars = rowsSource.map((row, index) => {
+        const groupCenter = left + groupWidth * index + groupWidth / 2;
+        const rowBars = series.map((item, seriesIndex) => {
+          const x = groupCenter - ((series.length - 1) * (barWidth + 6)) / 2 + seriesIndex * (barWidth + 6) - barWidth / 2;
+          const y = scaleY(row[item.key]);
+          const barHeight = (row[item.key] / maxValue) * plotHeight;
+          return `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="8" fill="${item.color}" />`;
+        }).join("");
+        return `${rowBars}<text x="${groupCenter}" y="${height - 20}" text-anchor="middle" font-size="11" fill="#5a6668">${formatMonth(row.month)}</text>`;
+      }).join("");
+
+      container.innerHTML = createSvg(width, height, `${grid}${bars}`);
+    }
+
+    function renderHorizontalRateBarChart(rowsSource, containerId) {
+      const container = document.getElementById(containerId);
+      if (!rowsSource.length) {
+        container.innerHTML = svgEmpty("Add data to compare monthly rates.");
+        return;
+      }
+
+      const width = 820;
+      const rowHeight = 56;
+      const height = Math.max(260, rowsSource.length * rowHeight + 34);
+      const left = 92;
+      const top = 16;
+      const right = 26;
+      const plotWidth = width - left - right;
+      const maxRate = Math.max(...rowsSource.flatMap((row) => [row.conversionRate, row.returnRate]), 1);
+
+      const grid = Array.from({ length: 5 }, (_, i) => {
+        const value = (maxRate / 4) * i;
+        const x = left + (plotWidth / 4) * i;
+        return `
+          <line x1="${x}" y1="${top}" x2="${x}" y2="${height - 18}" stroke="rgba(31,42,44,0.12)" />
+          <text x="${x}" y="${height - 2}" text-anchor="middle" font-size="11" fill="#5a6668">${formatPercent(value)}</text>
+        `;
+      }).join("");
+
+      const bars = rowsSource.map((row, index) => {
+        const y = top + index * rowHeight;
+        const conversionWidth = (row.conversionRate / maxRate) * plotWidth;
+        const returnWidth = (row.returnRate / maxRate) * plotWidth;
+        return `
+          <text x="${left - 12}" y="${y + 19}" text-anchor="end" font-size="12" fill="#1f2a2c">${formatMonth(row.month)}</text>
+          <rect x="${left}" y="${y + 4}" width="${conversionWidth}" height="14" rx="7" fill="#637937" />
+          <rect x="${left}" y="${y + 24}" width="${returnWidth}" height="14" rx="7" fill="#b6443b" />
+        `;
+      }).join("");
+
+      container.innerHTML = createSvg(width, height, `${grid}${bars}`);
+    }
+
+    function renderStackedBarChart(rowsSource, containerId) {
+      const container = document.getElementById(containerId);
+      if (!rowsSource.length) {
+        container.innerHTML = svgEmpty("Add data to view this chart.");
+        return;
+      }
+
+      const width = 820;
+      const height = 320;
+      const left = 56;
+      const top = 18;
+      const right = 18;
+      const bottom = 56;
+      const plotWidth = width - left - right;
+      const plotHeight = height - top - bottom;
+      const maxValue = Math.max(...rowsSource.map((row) => row.sent + row.sold + row.return), 1);
+      const groupWidth = plotWidth / rowsSource.length;
+      const barWidth = Math.min(42, groupWidth * 0.45);
+      const scaleY = (value) => top + plotHeight - (value / maxValue) * plotHeight;
+      const series = [
+        { key: "sent", color: "#0d6c68" },
+        { key: "sold", color: "#d28842" },
+        { key: "return", color: "#b6443b" }
+      ];
+
+      const grid = Array.from({ length: 5 }, (_, i) => {
+        const value = (maxValue / 4) * i;
+        const y = top + plotHeight - (plotHeight / 4) * i;
+        return `
+          <line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="rgba(31,42,44,0.12)" />
+          <text x="${left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#5a6668">${formatValue(value)}</text>
+        `;
+      }).join("");
+
+      const bars = rowsSource.map((row, index) => {
+        const x = left + groupWidth * index + groupWidth / 2 - barWidth / 2;
+        let cumulative = 0;
+        const rects = series.map((item) => {
+          cumulative += row[item.key];
+          const y = scaleY(cumulative);
+          const previousY = scaleY(cumulative - row[item.key]);
+          return `<rect x="${x}" y="${y}" width="${barWidth}" height="${previousY - y}" rx="8" fill="${item.color}" />`;
+        }).join("");
+        return `${rects}<text x="${x + barWidth / 2}" y="${height - 20}" text-anchor="middle" font-size="11" fill="#5a6668">${formatMonth(row.month)}</text>`;
+      }).join("");
+
+      container.innerHTML = createSvg(width, height, `${grid}${bars}`);
+    }
+
+    function renderComboChart(rowsSource, containerId) {
+      const container = document.getElementById(containerId);
+      if (!rowsSource.length) {
+        container.innerHTML = svgEmpty("Add data to view this chart.");
+        return;
+      }
+
+      const width = 820;
+      const height = 320;
+      const left = 56;
+      const top = 18;
+      const right = 18;
+      const bottom = 52;
+      const plotWidth = width - left - right;
+      const plotHeight = height - top - bottom;
+      const maxValue = Math.max(...rowsSource.flatMap((row) => [row.sent, row.sold + row.return]), 1);
+      const groupWidth = plotWidth / rowsSource.length;
+      const barWidth = Math.min(54, groupWidth * 0.52);
+      const stepX = rowsSource.length > 1 ? plotWidth / (rowsSource.length - 1) : 0;
+      const scaleY = (value) => top + plotHeight - (value / maxValue) * plotHeight;
+      const scaleX = (index) => rowsSource.length > 1 ? left + stepX * index : left + plotWidth / 2;
+
+      const grid = Array.from({ length: 5 }, (_, i) => {
+        const value = (maxValue / 4) * i;
+        const y = top + plotHeight - (plotHeight / 4) * i;
+        return `
+          <line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="rgba(31,42,44,0.12)" />
+          <text x="${left - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#5a6668">${formatValue(value)}</text>
+        `;
+      }).join("");
+
+      const xLabels = rowsSource.map((row, index) => `
+        <text x="${scaleX(index)}" y="${height - 20}" text-anchor="middle" font-size="11" fill="#5a6668">${formatMonth(row.month)}</text>
+      `).join("");
+
+      const stackedBars = rowsSource.map((row, index) => {
+        const centerX = left + groupWidth * index + groupWidth / 2;
+        const soldHeight = (row.sold / maxValue) * plotHeight;
+        const returnHeight = (row.return / maxValue) * plotHeight;
+        const soldY = scaleY(row.sold);
+        const returnY = scaleY(row.sold + row.return);
+        return `
+          <rect x="${centerX - barWidth / 2}" y="${soldY}" width="${barWidth}" height="${soldHeight}" rx="10" fill="#d28842" opacity="0.9" />
+          <rect x="${centerX - barWidth / 2}" y="${returnY}" width="${barWidth}" height="${returnHeight}" rx="10" fill="#b6443b" opacity="0.92" />
+        `;
+      }).join("");
+
+      const sentPath = rowsSource.map((row, index) => `${index === 0 ? "M" : "L"} ${scaleX(index)} ${scaleY(row.sent)}`).join(" ");
+      const sentDots = rowsSource.map((row, index) => `<circle cx="${scaleX(index)}" cy="${scaleY(row.sent)}" r="4.5" fill="#0d6c68" stroke="#ffffff" stroke-width="2" />`).join("");
+
+      container.innerHTML = createSvg(width, height, `${grid}${xLabels}${stackedBars}<path d="${sentPath}" fill="none" stroke="#0d6c68" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" />${sentDots}`);
+    }
+
+    function renderDumbbellChart(rowsSource, containerId) {
+      const container = document.getElementById(containerId);
+      if (!rowsSource.length) {
+        container.innerHTML = svgEmpty("Add data to compare monthly rates.");
+        return;
+      }
+
+      const width = 820;
+      const rowHeight = 42;
+      const height = Math.max(260, rowsSource.length * rowHeight + 52);
+      const left = 92;
+      const top = 16;
+      const right = 26;
+      const bottom = 24;
+      const plotWidth = width - left - right;
+      const maxRate = Math.max(...rowsSource.flatMap((row) => [row.conversionRate, row.returnRate]), 1);
+      const scaleX = (value) => left + (value / maxRate) * plotWidth;
+
+      const grid = Array.from({ length: 5 }, (_, i) => {
+        const value = (maxRate / 4) * i;
+        const x = left + (plotWidth / 4) * i;
+        return `
+          <line x1="${x}" y1="${top}" x2="${x}" y2="${height - bottom}" stroke="rgba(31,42,44,0.12)" />
+          <text x="${x}" y="${height - 6}" text-anchor="middle" font-size="11" fill="#5a6668">${formatPercent(value)}</text>
+        `;
+      }).join("");
+
+      const rowsMarkup = rowsSource.map((row, index) => {
+        const y = top + index * rowHeight + 16;
+        const conversionX = scaleX(row.conversionRate);
+        const returnX = scaleX(row.returnRate);
+        const startX = Math.min(conversionX, returnX);
+        const endX = Math.max(conversionX, returnX);
+        return `
+          <text x="${left - 12}" y="${y + 4}" text-anchor="end" font-size="12" fill="#1f2a2c">${formatMonth(row.month)}</text>
+          <line x1="${startX}" y1="${y}" x2="${endX}" y2="${y}" stroke="rgba(31,42,44,0.22)" stroke-width="6" stroke-linecap="round" />
+          <circle cx="${conversionX}" cy="${y}" r="7" fill="#637937" />
+          <circle cx="${returnX}" cy="${y}" r="7" fill="#b6443b" />
+          <text x="${conversionX}" y="${y - 12}" text-anchor="middle" font-size="11" fill="#637937">${formatPercent(row.conversionRate)}</text>
+          <text x="${returnX}" y="${y + 24}" text-anchor="middle" font-size="11" fill="#b6443b">${formatPercent(row.returnRate)}</text>
+        `;
+      }).join("");
+
+      container.innerHTML = createSvg(width, height, `${grid}${rowsMarkup}`);
+    }
+
+    function buildDetailSummary(detailRow) {
+      const soldShareOfSent = detailRow.sent > 0 ? detailRow.sold / detailRow.sent : 0;
+      const returnShareOfSent = detailRow.sent > 0 ? detailRow.return / detailRow.sent : 0;
+      return `
+        <div class="detail-summary">
+          <div class="detail-month">${formatMonth(detailRow.month)}</div>
+          <div class="detail-meta">
+            <div class="detail-metric">
+              <small>Sent</small>
+              <strong>${formatValue(detailRow.sent)} SAR</strong>
+            </div>
+            <div class="detail-metric">
+              <small>Sold</small>
+              <strong>${formatValue(detailRow.sold)} SAR</strong>
+              <div class="detail-progress"><span style="width:${Math.min(soldShareOfSent * 100, 100)}%;background:#d28842"></span></div>
+            </div>
+            <div class="detail-metric">
+              <small>Return</small>
+              <strong>${formatValue(detailRow.return)} SAR</strong>
+              <div class="detail-progress"><span style="width:${Math.min(returnShareOfSent * 100, 100)}%;background:#b6443b"></span></div>
+            </div>
+            <div class="detail-metric">
+              <small>Rates</small>
+              <strong>${formatPercent(detailRow.conversionRate)}</strong>
+              <div class="subtle">Return Rate ${formatPercent(detailRow.returnRate)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDetailDonut(detailRow) {
+      const total = Math.max(detailRow.sold + detailRow.return, 1);
+      const soldStroke = (detailRow.sold / total) * 408;
+      const returnStroke = (detailRow.return / total) * 408;
+      const donut = `
+        <svg viewBox="0 0 260 260" role="img" aria-label="Selected month donut chart">
+          <g transform="translate(130 130) rotate(-90)">
+            <circle cx="0" cy="0" r="65" fill="none" stroke="rgba(31,42,44,0.08)" stroke-width="24"></circle>
+            <circle cx="0" cy="0" r="65" fill="none" stroke="#d28842" stroke-width="24" stroke-linecap="round" stroke-dasharray="${soldStroke} 408"></circle>
+            <circle cx="0" cy="0" r="65" fill="none" stroke="#b6443b" stroke-width="24" stroke-linecap="round" stroke-dasharray="${returnStroke} 408" stroke-dashoffset="-${soldStroke}"></circle>
+          </g>
+          <text x="130" y="122" text-anchor="middle" font-size="14" fill="#5a6668">Selected</text>
+          <text x="130" y="150" text-anchor="middle" font-size="26" font-family="Cambria, Georgia, serif" fill="#1f2a2c">${formatMonth(detailRow.month)}</text>
+        </svg>
+      `;
+      return `<div class="detail-wrap"><div>${donut}</div>${buildDetailSummary(detailRow)}</div>`;
+    }
+
+    function renderDetailPie(detailRow) {
+      const total = Math.max(detailRow.sold + detailRow.return, 1);
+      const soldAngle = (detailRow.sold / total) * Math.PI * 2;
+      const soldX = 130 + 88 * Math.cos(soldAngle - Math.PI / 2);
+      const soldY = 130 + 88 * Math.sin(soldAngle - Math.PI / 2);
+      const largeArc = soldAngle > Math.PI ? 1 : 0;
+      const pie = `
+        <svg viewBox="0 0 260 260" role="img" aria-label="Selected month pie chart">
+          <circle cx="130" cy="130" r="88" fill="rgba(31,42,44,0.08)"></circle>
+          <path d="M130 130 L130 42 A88 88 0 ${largeArc} 1 ${soldX} ${soldY} Z" fill="#d28842"></path>
+          <path d="M130 130 L${soldX} ${soldY} A88 88 0 ${largeArc ? 0 : 1} 1 130 42 Z" fill="#b6443b"></path>
+          <circle cx="130" cy="130" r="32" fill="#fff"></circle>
+        </svg>
+      `;
+      return `<div class="detail-wrap"><div>${pie}</div>${buildDetailSummary(detailRow)}</div>`;
+    }
+
+    function renderDetailBars(detailRow) {
+      const maxValue = Math.max(detailRow.sent, detailRow.sold, detailRow.return, 1);
+      const metrics = [
+        { label: "Sent", value: detailRow.sent, color: "#0d6c68" },
+        { label: "Sold", value: detailRow.sold, color: "#d28842" },
+        { label: "Return", value: detailRow.return, color: "#b6443b" }
+      ];
+      const width = 360;
+      const height = 260;
+      const left = 80;
+      const top = 20;
+      const plotWidth = 240;
+      const barGap = 64;
+      const svg = createSvg(width, height, metrics.map((metric, index) => {
+        const y = top + index * barGap;
+        const barWidth = (metric.value / maxValue) * plotWidth;
+        return `
+          <text x="${left - 12}" y="${y + 18}" text-anchor="end" font-size="12" fill="#1f2a2c">${metric.label}</text>
+          <rect x="${left}" y="${y + 2}" width="${plotWidth}" height="24" rx="12" fill="rgba(31,42,44,0.08)" />
+          <rect x="${left}" y="${y + 2}" width="${barWidth}" height="24" rx="12" fill="${metric.color}" />
+          <text x="${left + Math.min(barWidth + 8, plotWidth - 6)}" y="${y + 19}" font-size="11" fill="#5a6668">${formatValue(metric.value)} SAR</text>
+        `;
+      }).join(""));
+      return `<div class="detail-wrap"><div>${svg}</div>${buildDetailSummary(detailRow)}</div>`;
+    }
+
+    function renderDetailFunnel(detailRow) {
+      const soldWidth = 260 * (detailRow.sold / Math.max(detailRow.sent, 1));
+      const returnWidth = 260 * (detailRow.return / Math.max(detailRow.sent, 1));
+      const svg = `
+        <svg viewBox="0 0 320 260" role="img" aria-label="Selected month funnel chart">
+          <polygon points="30,20 290,20 250,80 70,80" fill="#0d6c68" opacity="0.95"></polygon>
+          <polygon points="${160 - soldWidth / 2},100 ${160 + soldWidth / 2},100 ${160 + soldWidth / 2 - 24},160 ${160 - soldWidth / 2 + 24},160" fill="#d28842" opacity="0.95"></polygon>
+          <polygon points="${160 - returnWidth / 2},180 ${160 + returnWidth / 2},180 ${160 + returnWidth / 2 - 18},228 ${160 - returnWidth / 2 + 18},228" fill="#b6443b" opacity="0.95"></polygon>
+          <text x="160" y="54" text-anchor="middle" font-size="14" fill="#ffffff">Sent ${formatValue(detailRow.sent)}</text>
+          <text x="160" y="136" text-anchor="middle" font-size="13" fill="#ffffff">Sold ${formatValue(detailRow.sold)}</text>
+          <text x="160" y="210" text-anchor="middle" font-size="13" fill="#ffffff">Return ${formatValue(detailRow.return)}</text>
+        </svg>
+      `;
+      return `<div class="detail-wrap"><div>${svg}</div>${buildDetailSummary(detailRow)}</div>`;
+    }
+
+    function renderDetailGauge(detailRow) {
+      const ratio = detailRow.sent > 0 ? detailRow.sold / detailRow.sent : 0;
+      const circumference = 283;
+      const stroke = Math.max(0, Math.min(1, ratio)) * circumference;
+      const svg = `
+        <svg viewBox="0 0 280 200" role="img" aria-label="Selected month gauge chart">
+          <g transform="translate(140 150) rotate(180)">
+            <path d="M -90 0 A 90 90 0 0 1 90 0" fill="none" stroke="rgba(31,42,44,0.08)" stroke-width="24" stroke-linecap="round"></path>
+            <path d="M -90 0 A 90 90 0 0 1 90 0" fill="none" stroke="#637937" stroke-width="24" stroke-linecap="round" stroke-dasharray="${stroke} 283"></path>
+          </g>
+          <text x="140" y="108" text-anchor="middle" font-size="14" fill="#5a6668">Sold vs Sent</text>
+          <text x="140" y="136" text-anchor="middle" font-size="30" font-family="Cambria, Georgia, serif" fill="#1f2a2c">${formatPercent(ratio)}</text>
+          <text x="52" y="168" text-anchor="middle" font-size="11" fill="#5a6668">0%</text>
+          <text x="228" y="168" text-anchor="middle" font-size="11" fill="#5a6668">100%</text>
+        </svg>
+      `;
+      return `<div class="detail-wrap"><div>${svg}</div>${buildDetailSummary(detailRow)}</div>`;
+    }
+
+    function renderTrendChart(filteredRows) {
+      trendChartType.value = chartPrefs.trend;
+      const type = chartPrefs.trend;
+      if (type === "line") {
+        renderMultiSeriesLineChart(filteredRows, "trend-chart", "value");
+      } else if (type === "grouped") {
+        renderGroupedBarChart(filteredRows, "trend-chart", "value");
+      } else if (type === "stacked") {
+        renderStackedBarChart(filteredRows, "trend-chart");
+      } else if (type === "area") {
+        renderMultiSeriesAreaChart(filteredRows, "trend-chart", "value");
+      } else {
+        renderComboChart(filteredRows, "trend-chart");
+      }
+    }
+
+    function renderComparisonChart(filteredRows) {
+      comparisonChartType.value = chartPrefs.comparison;
+      const type = chartPrefs.comparison;
+      if (type === "line") {
+        renderMultiSeriesLineChart(filteredRows, "comparison-chart", "rate");
+      } else if (type === "bar") {
+        renderHorizontalRateBarChart(filteredRows, "comparison-chart");
+      } else if (type === "column") {
+        renderGroupedBarChart(filteredRows, "comparison-chart", "rate");
+      } else if (type === "area") {
+        renderMultiSeriesAreaChart(filteredRows, "comparison-chart", "rate");
+      } else {
+        renderDumbbellChart(filteredRows, "comparison-chart");
+      }
+    }
+
+    function renderReturnChart(detailRow) {
+      const container = document.getElementById("return-chart");
+      detailChartType.value = chartPrefs.detail;
+      if (!detailRow) {
+        container.innerHTML = svgEmpty("Select a month to see its individual breakdown.");
+        return;
+      }
+
+      if (chartPrefs.detail === "pie") {
+        container.innerHTML = renderDetailPie(detailRow);
+      } else if (chartPrefs.detail === "bars") {
+        container.innerHTML = renderDetailBars(detailRow);
+      } else if (chartPrefs.detail === "funnel") {
+        container.innerHTML = renderDetailFunnel(detailRow);
+      } else if (chartPrefs.detail === "gauge") {
+        container.innerHTML = renderDetailGauge(detailRow);
+      } else {
+        container.innerHTML = renderDetailDonut(detailRow);
+      }
+    }
+
+    function renderAll() {
+      rows = sanitizeRows(rows);
+      renderTable();
+      renderFilterOptions();
+      const filteredRows = getFilteredRows();
+      renderDetailFilterOptions(filteredRows);
+      const detailRow = getSelectedDetailRow(filteredRows);
+      renderKpis(filteredRows);
+      renderTrendChart(filteredRows);
+      renderComparisonChart(filteredRows);
+      renderReturnChart(detailRow);
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const month = monthInput.value;
+      const sent = toNumber(sentInput.value);
+      const sold = toNumber(soldInput.value);
+      const returned = toNumber(returnInput.value);
+
+      if (!month) {
+        setStatus("Choose a month before saving.", true);
+        return;
+      }
+
+      if ([sent, sold, returned].some((value) => value < 0)) {
+        setStatus("Values must be zero or greater.", true);
+        return;
+      }
+
+      const targetMonth = editingMonth || month;
+      const existingIndex = rows.findIndex((row) => row.month === targetMonth);
+      const newRow = { month: targetMonth, sent, sold, return: returned };
+
+      if (existingIndex >= 0) {
+        rows.splice(existingIndex, 1, newRow);
+      } else {
+        rows.push(newRow);
+      }
+
+      saveRows();
+      renderAll();
+      resetForm();
+      setStatus(`${formatMonth(targetMonth)} saved successfully.`);
+    });
+
+    tableBody.addEventListener("click", (event) => {
+      const editTarget = event.target.closest("[data-edit]");
+      const deleteTarget = event.target.closest("[data-delete]");
+
+      if (editTarget) {
+        editRow(editTarget.dataset.edit);
+      }
+
+      if (deleteTarget) {
+        deleteRow(deleteTarget.dataset.delete);
+      }
+    });
+
+    monthFilter.addEventListener("change", renderAll);
+    detailMonthFilter.addEventListener("change", renderAll);
+    trendChartType.addEventListener("change", (event) => {
+      chartPrefs.trend = event.target.value;
+      saveChartPrefs();
+      renderAll();
+    });
+    comparisonChartType.addEventListener("change", (event) => {
+      chartPrefs.comparison = event.target.value;
+      saveChartPrefs();
+      renderAll();
+    });
+    detailChartType.addEventListener("change", (event) => {
+      chartPrefs.detail = event.target.value;
+      saveChartPrefs();
+      renderAll();
+    });
+    document.getElementById("clear-form").addEventListener("click", () => {
+      resetForm();
+      setStatus("Form cleared.");
+    });
+    document.getElementById("export-excel").addEventListener("click", exportExcel);
+    document.getElementById("import-data").addEventListener("click", () => {
+      importFileInput.click();
+    });
+    importFileInput.addEventListener("change", async (event) => {
+      const [file] = event.target.files || [];
+      if (!file) {
+        return;
+      }
+      try {
+        const importedRows = await importSpreadsheet(file);
+        rows = sanitizeRows(importedRows);
+        saveRows();
+        renderAll();
+        resetForm();
+        setStatus(`Imported ${rows.length} month${rows.length === 1 ? "" : "s"} successfully.`);
+      } catch (error) {
+        setStatus(error.message || "Unable to import the file.", true);
+      } finally {
+        importFileInput.value = "";
+      }
+    });
+    document.getElementById("reset-data").addEventListener("click", resetData);
+
+    renderAll();
+    setStatus("Loaded with the February reference values you shared.");
+  </script>
+</body>
+</html>
